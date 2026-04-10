@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pictura — Incompatibility Modal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --cream:        #f5f0e8;
+      --card-bg:      #fdfaf5;
+      --black:        #1a1714;
+      --brown:        #3d2e1e;
+      --gold:         #b8865a;
+      --gold-hover:   #9a6e45;
+      --gold-icon-bg: #f0e4cf;
+      --muted:        #9e8e7e;
+      --border:       #ddd5c8;
+      --radius-card:  18px;
+      --radius-btn:   12px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--cream);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ══════════════════════════════════════════
+       OVERLAY
+    ══════════════════════════════════════════ */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 12, 8, 0.52);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 0.22s ease;
+    }
+    .overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* ══════════════════════════════════════════
+       MODAL CARD
+    ══════════════════════════════════════════ */
+    .modal {
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      width: 100%;
+      max-width: 460px;
+      padding: 38px 38px 34px;
+      position: relative;
+      transform: translateY(0);
+      opacity: 1;
+      transition: transform 0.28s cubic-bezier(.22,.68,0,1.2), opacity 0.22s;
+    }
+    .overlay.hidden .modal {
+      transform: translateY(14px);
+      opacity: 0;
+    }
+
+    /* ── Close button ── */
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 22px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #b0a090;
+      font-size: 20px;
+      line-height: 1;
+      padding: 2px 5px;
+      transition: color 0.15s;
+    }
+    .modal-close:hover { color: var(--black); }
+
+    /* ── Eyebrow — matches "FOR", "PRODUCT" label style from screenshot ── */
+    .eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Title row — icon + text side by side ── */
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    /* ── Icon circle ── */
+    .icon-circle {
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      background: var(--gold-icon-bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .icon-circle svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--gold);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ── Title ── */
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 400;
+      line-height: 1.2;
+      margin: 0;
+    }
+    .modal-title .word-plain  {
+      color: var(--brown);
+      font-style: normal;
+      font-weight: 400;
+    }
+    .modal-title .word-italic {
+      color: var(--gold);
+      font-style: italic;
+      font-weight: 400;
+    }
+
+    /* ── Body text — matches the clean muted description text ── */
+    .modal-body {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 16px;
+      margin-bottom: 28px;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 26px;
+    }
+
+    /* ── Button row ── */
+    .btn-row { display: flex; gap: 14px; }
+
+    /* Discard — outlined, matches CANCEL style */
+    .btn-discard {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 17px 0;
+      border-radius: var(--radius-btn);
+      border: 1.5px solid var(--border);
+      background: transparent;
+      color: #6a5c4e;
+      cursor: pointer;
+      flex: 1;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-discard:hover { border-color: var(--gold); color: var(--gold); }
+
+    /* Reset All — solid brown/gold fill */
+    .btn-reset {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      padding: 17px 28px;
+      border-radius: var(--radius-btn);
+      border: none;
+      background: var(--gold);
+      color: #fff;
+      cursor: pointer;
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.15s;
+    }
+    .btn-reset:hover { background: var(--gold-hover); }
+    .btn-reset .arrow { font-size: 16px; font-weight: 300; line-height: 1; }
+
+    /* ══════════════════════════════════════════
+       DEMO TRIGGER (remove in production)
+    ══════════════════════════════════════════ */
+    .demo-trigger {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 13px 28px;
+      border-radius: 10px;
+      border: 1.5px solid #c8b8a8;
+      background: transparent;
+      color: #6a5c4e;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+    .demo-trigger:hover { background: #e8dfd0; color: var(--black); }
+  </style>
+</head>
+
+<body>
+
+  <!-- Demo trigger — remove in production -->
+  <button class="demo-trigger" onclick="showModal()">Show Incompatibility Modal</button>
+
+
+  <!-- ══════════════════════════════════════════
+       MODAL
+       ──────────────────────────────────────────
+       API:
+         showModal()          — open
+         showModal("msg")     — open with custom message
+         closeModal()         — close
+         onReset   = ()=>{}   — reset callback
+         onDiscard = ()=>{}   — discard callback
+  ══════════════════════════════════════════ -->
+  <div class="overlay hidden" id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">✕</button>
+
+      <p class="eyebrow">Incompatible Choice</p>
+
+      <div class="title-row">
+        <div class="icon-circle">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8"  x2="12"    y2="12"/>
+            <line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+        </div>
+        <h2 class="modal-title" id="modalTitle">
+          <span class="word-plain">Oops! </span><span class="word-italic">Not Compatible</span>
+        </h2>
+      </div>
+
+      <p class="modal-body" id="modalBody">
+        This choice isn't compatible with your current selections. Would you like to reset all and start over, or discard this last choice?
+      </p>
+
+      <div class="divider"></div>
+
+      <div class="btn-row">
+        <button class="btn-discard" onclick="handleDiscard()">Discard</button>
+        <button class="btn-reset"   onclick="handleReset()">Reset All <span class="arrow">→</span></button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <script>
+    /* ── Public API ──────────────────────────────────────────────── */
+    let onReset   = null;   // onReset   = () => { your reset logic   };
+    let onDiscard = null;   // onDiscard = () => { your discard logic  };
+
+    const DEFAULT_MSG = "This choice isn't compatible with your current selections. Would you like to reset all and start over, or discard this last choice?";
+
+    function showModal(message) {
+      document.getElementById('modalBody').textContent = message || DEFAULT_MSG;
+      document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.add('hidden');
+    }
+
+    function handleReset() {
+      closeModal();
+      if (typeof onReset === 'function') onReset();
+    }
+
+    function handleDiscard() {
+      closeModal();
+      if (typeof onDiscard === 'function') onDiscard();
+    }
+
+    /* Close on backdrop click */
+    document.getElementById('overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+
+    /* Close on Escape */
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+  </script>
+
+</body>
+</html>
